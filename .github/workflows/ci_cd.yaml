@@ -2,9 +2,9 @@ name: CI-CD Pipeline
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build-and-deploy:
@@ -42,7 +42,7 @@ import sys, os
 print("=== sys.path ===")
 for p in sys.path:
     print(" -", p)
-print("\n=== Directory ===")
+print("\n=== Directory Contents ===")
 print(os.listdir('.'))
 EOF
 
