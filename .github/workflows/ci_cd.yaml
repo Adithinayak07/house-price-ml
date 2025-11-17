@@ -26,6 +26,8 @@ jobs:
       - name: 🔧 Set PYTHONPATH so src/ is importable
         run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
 
+      - name: Add project to PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
       - name: 🧪 Run Tests (Optional)
         run: pytest || echo "⚠️ No tests found, skipping."
