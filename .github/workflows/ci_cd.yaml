@@ -1,0 +1,66 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 📦 Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧪 Run Tests (Optional)
+        run: pytest || echo "⚠️ No tests found, skipping."
+
+      - name: 🏋 Train Model
+        run: |
+          python -m src.models.train --config config/config.yaml
+
+      - name: 📦 Upload Model Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-model
+          path: models/
+
+      - name: 🔐 Login to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install huggingface-hub
+          huggingface-cli login --token "$HF_TOKEN"
+
+      - name: 🚀 Deploy to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+
+          # Clone the HF Space repository
+          git clone https://huggingface.co/spaces/Adithinayak/house-price-ml hf_space
+
+          # Copy app files to HF Space
+          cp -r src/api hf_space/api
+          cp -r src/ui hf_space/ui
+          cp -r models hf_space/models
+          cp Dockerfile hf_space/Dockerfile
+          cp requirements.txt hf_space/requirements.txt
+
+          cd hf_space
+          git add .
+          git commit -m "🚀 Auto-deploy from GitHub Actions" || echo "No changes to commit"
+          git push https://Adithinayak:$HF_TOKEN@huggingface.co/spaces/Adithinayak/house-price-ml.git

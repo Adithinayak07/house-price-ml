@@ -1,0 +1,26 @@
+# Virtual environment
+mlvenv/
+venv/
+
+# MLflow artifacts
+mlruns/
+mlflow.db
+
+# Model files
+models/
+*.joblib
+
+# Data folders
+data/raw/*
+data/processed/*
+data/*.csv
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+
+# Environment files
+.env

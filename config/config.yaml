@@ -1,0 +1,11 @@
+raw_path: "data/raw/houseprices.csv"
+target_column: "rent"
+
+preprocessing:
+  test_size: 0.2
+  random_state: 42
+
+mlflow:
+  tracking_uri: "http://localhost:5000"
+  experiment_name: "house_rent_experiment"
+  registered_model_name: "HouseRentLinearModel"
