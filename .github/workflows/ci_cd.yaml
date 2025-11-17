@@ -31,10 +31,12 @@ jobs:
           python -m src.models.train --config config/config.yaml
 
       - name: 📦 Upload Model Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: trained-model
-          path: models/
+            name: trained-model
+            path: models/
+            retention-days: 7
+
 
       - name: 🔐 Login to Hugging Face
         env:
