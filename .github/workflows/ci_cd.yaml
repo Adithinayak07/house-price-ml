@@ -11,82 +11,70 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: 📦 Install Dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🔍 Verify working directory
+      - name: Verify working directory
         run: |
           echo "PWD:"
           pwd
           echo "Files:"
           ls -R .
 
-      # ------------------------------
-      # ⭐ FIX 1: Clean PYTHONPATH
-      # ------------------------------
-      - name: 🔧 Set PYTHONPATH to project root
+      - name: Set PYTHONPATH to project root
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
-      # ------------------------------
-      # ⭐ FIX 2: Debug Python import paths
-      # ------------------------------
-      - name: 🐍 Debug PYTHONPATH + sys.path
+      - name: Debug Python Paths
         run: |
           echo "PYTHONPATH=$PYTHONPATH"
           python - << 'EOF'
 import sys, os
-print("\n=== Python sys.path ===")
+print("=== sys.path ===")
 for p in sys.path:
     print(" -", p)
-print("\n=== Directory content ===")
+print("\n=== Directory ===")
 print(os.listdir('.'))
 EOF
 
-      - name: 🧪 Run Tests (Optional)
-        run: pytest || echo "⚠️ No tests found, skipping."
+      - name: Run Tests
+        run: pytest || echo "No tests, skipping."
 
-      # ------------------------------
-      # ⭐ FIX 3: Run training correctly
-      # ------------------------------
-      - name: 🏋 Train Model
-        working-directory: ${{ github.workspace }}
+      - name: Train Model
         run: python -m src.models.train --config config/config.yaml
 
-      - name: 📦 Upload Model Artifact
+      - name: Upload Model Artifact
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
           path: models/
           retention-days: 7
 
-      - name: 🔐 Login to Hugging Face
+      - name: Login to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           pip install huggingface-hub
           huggingface-cli login --token "$HF_TOKEN"
 
-      - name: 🚀 Deploy to Hugging Face Space
+      - name: Deploy to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
 
-          # Clone the HF Space repository
           git clone https://huggingface.co/spaces/Adithinayak/house-price-ml hf_space
 
-          # Copy required project files to HF Space
           cp -r src/api hf_space/api
           cp -r src/ui hf_space/ui
           cp -r models hf_space/models
@@ -95,5 +83,5 @@ EOF
 
           cd hf_space
           git add .
-          git commit -m "🚀 Auto-deploy from GitHub Actions" || echo "No changes to commit"
+          git commit -m "Auto deploy from CI" || echo "No changes"
           git push https://Adithinayak:$HF_TOKEN@huggingface.co/spaces/Adithinayak/house-price-ml.git
