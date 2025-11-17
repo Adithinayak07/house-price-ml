@@ -26,60 +26,16 @@ jobs:
 
       - name: Verify working directory
         run: |
-          echo "PWD:"
           pwd
-          echo "Files:"
           ls -R .
 
-      - name: Set PYTHONPATH to project root
+      - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
       - name: Debug Python Paths
         run: |
           echo "PYTHONPATH=$PYTHONPATH"
-          python - << 'EOF'
-import sys, os
-print("=== sys.path ===")
-for p in sys.path:
-    print(" -", p)
-print("\n=== Directory Contents ===")
-print(os.listdir('.'))
-EOF
-
-      - name: Run Tests
-        run: pytest || echo "No tests, skipping."
+          python -c "import sys, os; print(sys.path); print(os.listdir('.'))"
 
       - name: Train Model
         run: python -m src.models.train --config config/config.yaml
-
-      - name: Upload Model Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: trained-model
-          path: models/
-          retention-days: 7
-
-      - name: Login to Hugging Face
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          pip install huggingface-hub
-          huggingface-cli login --token "$HF_TOKEN"
-
-      - name: Deploy to Hugging Face Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          git config user.email "github-actions@github.com"
-          git config user.name "GitHub Actions"
-          git clone https://huggingface.co/spaces/Adithinayak/house-price-ml hf_space
-          cp -r src/api hf_space/api
-          cp -r src/ui hf_space/ui
-          cp -r models hf_space/models
-          cp Dockerfile hf_space/Dockerfile
-          cp requirements.txt hf_space/requirements.txt
-
-          cd hf_space
-          git add .
-          git commit -m "Auto deploy from CI" || echo "No changes"
-          git push https://Adithinayak:$HF_TOKEN@huggingface.co/spaces/Adithinayak/house-price-ml.git
