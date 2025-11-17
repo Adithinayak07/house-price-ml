@@ -72,9 +72,7 @@ EOF
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
-
           git clone https://huggingface.co/spaces/Adithinayak/house-price-ml hf_space
-
           cp -r src/api hf_space/api
           cp -r src/ui hf_space/ui
           cp -r models hf_space/models
