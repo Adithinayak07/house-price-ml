@@ -26,17 +26,38 @@ jobs:
 
       - name: 🔍 Verify working directory
         run: |
-          echo "Current directory:"
+          echo "PWD:"
           pwd
-          echo "Listing files:"
+          echo "Files:"
           ls -R .
 
-      - name: 🔧 Fix PYTHONPATH for imports
-        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
+      # ------------------------------
+      # ⭐ FIX 1: Clean PYTHONPATH
+      # ------------------------------
+      - name: 🔧 Set PYTHONPATH to project root
+        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+
+      # ------------------------------
+      # ⭐ FIX 2: Debug Python import paths
+      # ------------------------------
+      - name: 🐍 Debug PYTHONPATH + sys.path
+        run: |
+          echo "PYTHONPATH=$PYTHONPATH"
+          python - << 'EOF'
+import sys, os
+print("\n=== Python sys.path ===")
+for p in sys.path:
+    print(" -", p)
+print("\n=== Directory content ===")
+print(os.listdir('.'))
+EOF
 
       - name: 🧪 Run Tests (Optional)
         run: pytest || echo "⚠️ No tests found, skipping."
 
+      # ------------------------------
+      # ⭐ FIX 3: Run training correctly
+      # ------------------------------
       - name: 🏋 Train Model
         working-directory: ${{ github.workspace }}
         run: python -m src.models.train --config config/config.yaml
@@ -44,9 +65,9 @@ jobs:
       - name: 📦 Upload Model Artifact
         uses: actions/upload-artifact@v4
         with:
-            name: trained-model
-            path: models/
-            retention-days: 7
+          name: trained-model
+          path: models/
+          retention-days: 7
 
       - name: 🔐 Login to Hugging Face
         env:
