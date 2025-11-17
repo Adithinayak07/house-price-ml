@@ -23,6 +23,10 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: 🔧 Set PYTHONPATH so src/ is importable
+        run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
+
       - name: 🧪 Run Tests (Optional)
         run: pytest || echo "⚠️ No tests found, skipping."
 
