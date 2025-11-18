@@ -24,24 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Verify working directory
-        run: |
-          pwd
-          ls -R .
-
       - name: Set PYTHONPATH
         run: |
           echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
-
-      - name: Debug Python Paths
-        run: |
-          echo "PYTHONPATH=$PYTHONPATH"
-          python - <<'EOF'
-import sys, os
-print("sys.path:", sys.path)
-print("pwd:", os.getcwd())
-print("directory listing:", os.listdir())
-EOF
 
       - name: Train Model
         run: python -m src.models.train --config config/config.yaml
