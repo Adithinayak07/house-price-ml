@@ -36,7 +36,7 @@ jobs:
       - name: Debug Python Paths
         run: |
           echo "PYTHONPATH=$PYTHONPATH"
-          python - <<EOF
+          python - <<'EOF'
 import sys, os
 print("sys.path:", sys.path)
 print("pwd:", os.getcwd())
